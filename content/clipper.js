@@ -1,120 +1,80 @@
-// content/clipper.js
-// Markdown Page Clipper – контент-скрипт
+// content/clipper.js  (verbose debug edition)
 (async () => {
-  console.log('[MarkdownClipper] clipper.js start');
+  const log = (...args) => console.log('%c[MD-Clipper]', 'color:#03a9f4', ...args);
+  const err = (...args) => console.error('%c[MD-Clipper]', 'color:#f44336', ...args);
 
-  /*-------------------------------------------------------
-    1. Динамическая загрузка библиотек из пакета расширения
-  -------------------------------------------------------*/
+  /* ---------------- 1. loadLib ----------------- */
   const loadLib = async (path, globalName) => {
-    if (window[globalName]) return;                     // уже загружена
-    const url  = chrome.runtime.getURL(path);
-    const text = await fetch(url).then(r => {
-      if (!r.ok) throw new Error(`${path} HTTP ${r.status}`);
-      return r.text();
-    });
-    try {
-      (0, eval)(text);                                 // выполняем код
-    } catch (e) {
-      console.error(`[MarkdownClipper] ${globalName} eval error`, e);
-      throw e;
-    }
-    if (!window[globalName]) {
-      throw new Error(`${globalName} failed to register`);
-    }
+    if (window[globalName]) { log(globalName, 'уже загружен'); return; }
+    const url = chrome.runtime.getURL(path);
+    log('Загружаем', path, '→', url);
+    const res = await fetch(url);
+    log(path, 'HTTP', res.status);
+    if (!res.ok) throw new Error(`${path} HTTP ${res.status}`);
+    const js = await res.text();
+    try { (0, eval)(js); }
+    catch (e) { err('eval провалился для', path, e); throw e; }
+    if (!window[globalName]) throw new Error(`${globalName} не появился в window`);
+    log(globalName, 'успешно зарегистрирован');
   };
 
-  await loadLib('content/libs/readability.js', 'Readability');
-  await loadLib('content/libs/turndown.js',  'TurndownService');
+  try {
+    await loadLib('content/libs/readability.js', 'Readability');
+    await loadLib('content/libs/turndown.js',  'TurndownService');
+  } catch (e) {
+    err('Не удалось загрузить библиотеки → выходим');
+    alert('Markdown Page Clipper: библиотеки не найдены.\n' + e);
+    return;
+  }
 
-  /*-------------------------------------------------------
-    2. Вспомогательные функции
-  -------------------------------------------------------*/
-  // 2.1 HTML выделенного пользователем фрагмента
+  /* --------------- 2. выбор HTML --------------- */
   const getSelectedHtml = () => {
-    const sel = window.getSelection();
+    const sel = getSelection();
     if (!sel || sel.isCollapsed) return null;
-    const range = sel.getRangeAt(0).cloneContents();
-    const div = document.createElement('div');
-    div.appendChild(range);
-    return div.innerHTML.trim();
+    const frag = sel.getRangeAt(0).cloneContents();
+    const div  = document.createElement('div');
+    div.appendChild(frag); return div.innerHTML.trim();
   };
-
-  // 2.2 Главная статья через Readability
   const getMainArticleHtml = () => {
     const clone = document.cloneNode(true);
-    const article = new Readability(clone).parse();
-    return article ? article.content : '';
+    const art = new Readability(clone).parse();
+    return art ? art.content : '';
   };
 
-  /*-------------------------------------------------------
-    3. Определяем, что копировать
-  -------------------------------------------------------*/
   let html = getSelectedHtml();
-  if (!html || html.length < 30) html = getMainArticleHtml();
-
-  if (!html) {
-    alert('Markdown Page Clipper: не удалось извлечь содержимое.');
-    return;
+  log('Выделенный HTML', html ? html.slice(0,60)+'…' : '—');
+  if (!html || html.length < 30) {
+    log('Используем Readability');
+    html = getMainArticleHtml();
   }
 
-  /*-------------------------------------------------------
-    4. HTML → Markdown  (Turndown)
-  -------------------------------------------------------*/
-  const turndownService = new TurndownService({
-    headingStyle:     'atx',
-    bulletListMarker: '-',
-    codeBlockStyle:   'fenced'
-  });
+  if (!html) { err('html пустой'); alert('Не удалось извлечь контент'); return; }
 
-  // Правило: <pre> →
+  /* --------------- 3. Turndown ----------------- */
+  log('Создаём TurndownService');
+  const td = new TurndownService();
+  const md = td.turndown(html);
+  log('Markdown длина', md.length);
 
-   turndownService.addRule('preToCodeBlock', {
-    filter: node => node.nodeName === 'PRE',
-    replacement: content =>
-      `\n\`\`\`\n${content.replace(/^\n+|\n+$/g, '')}\n\`\`\`\n`
-  });
-
-  const markdown = turndownService.turndown(html);
-
-  /*-------------------------------------------------------
-    5. Копируем в буфер обмена
-  -------------------------------------------------------*/
+  /* --------------- 4. Clipboard ---------------- */
   try {
-    await navigator.clipboard.writeText(markdown);
-  } catch (err) {
-    console.error('[MarkdownClipper] clipboard write failed', err);
-    alert('Markdown Page Clipper: не удалось записать в буфер.');
+    await navigator.clipboard.writeText(md);
+    log('✓ скопировано в буфер');
+  } catch (e) {
+    err('Clipboard error', e);
+    alert('Не удалось записать в буфер: '+e);
     return;
   }
 
-  /*-------------------------------------------------------
-    6. Тост-уведомление
-  -------------------------------------------------------*/
-  const TOAST_CSS = `
-    .__mdclip_toast{
-      all:initial;position:fixed;right:20px;bottom:20px;z-index:2147483647;
-      background:#323232;color:#fff;font:14px/1.35 -apple-system,BlinkMacSystemFont,
-                 "Segoe UI",Roboto,sans-serif;
-      padding:8px 12px;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.3);
-      opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s
-    }
-    .__mdclip_toast.show{opacity:1;transform:translateY(0)}
-  `;
-  if (!document.getElementById('__mdclip_style')) {
-    const style = document.createElement('style');
-    style.id = '__mdclip_style';
-    style.textContent = TOAST_CSS;
-    document.head.appendChild(style);
-  }
-
+  /* --------------- 5. Toast -------------------- */
   const toast = document.createElement('div');
-  toast.className = '__mdclip_toast';
-  toast.textContent = `✓ Скопировано ${markdown.split(/\s+/).length} слов`;
+  toast.textContent = '✓ Скопировано ('+md.length+' симв.)';
+  Object.assign(toast.style, {
+    all:'initial',position:'fixed',right:'20px',bottom:'20px',background:'#323232',
+    color:'#fff',padding:'8px 12px',borderRadius:'4px',font:'14px sans-serif',
+    zIndex:2147483647,opacity:0,transition:'opacity .25s'
+  });
   document.body.appendChild(toast);
-
-  requestAnimationFrame(() => toast.classList.add('show'));
-  setTimeout(() => toast.remove(), 2500);
-
-  console.log('[MarkdownClipper] done, chars:', markdown.length);
+  requestAnimationFrame(()=>toast.style.opacity=1);
+  setTimeout(()=>toast.remove(),2500);
 })();
