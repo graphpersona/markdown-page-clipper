@@ -1,0 +1,25 @@
+{
+  "name": "Markdown Page Clipper",
+  "description": "Copy the main content—or a selection—of any page to the clipboard in Markdown.",
+  "version": "1.0.0",
+  "manifest_version": 3,
+
+  "icons": { "128": "assets/icon-128.png" },
+
+  "action": { "default_title": "Clip page to Markdown" },
+
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "clipboardWrite"
+  ],
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  }
+}
