@@ -19,8 +19,8 @@
   };
 
   try {
-    await loadLib('libs/readability.js', 'Readability');
-    await loadLib('libs/turndown.js',  'TurndownService');
+    await loadLib('content/libs/readability.js', 'Readability');
+    await loadLib('content/libs/turndown.js',  'TurndownService');
   } catch (e) {
     err('Не удалось загрузить библиотеки → выходим');
     alert('Markdown Page Clipper: библиотеки не найдены.\n' + e);
