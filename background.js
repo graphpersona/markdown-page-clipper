@@ -4,7 +4,9 @@ chrome.action.onClicked.addListener(async (tab) => {
   try {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      files: ['content/clipper.js']
+      files: ['content/libs/readability.js',
+              'content/libs/turndown.js',
+              'content/clipper.js']
     });
     console.log('[MarkdownClipper] clipper.js injected OK');
   } catch (e) {
