@@ -14,6 +14,9 @@
   ----------------------------------------------*/
   const sel = getSelection();
   let html = null;
+  const forceSelection = window.__mdclipperUseSelection === true;
+
+  // Check for selection
   if (sel && !sel.isCollapsed) {
     const range = sel.getRangeAt(0).cloneContents();
     const div = document.createElement('div');
@@ -21,11 +24,14 @@
     html = div.innerHTML.trim();
     log('Используем выделенный фрагмент');
   }
-  if (!html || html.length < 30) {
+
+  // If no selection or selection is too small and we're not in selection-only mode
+  if ((!html || html.length < 30) && !forceSelection) {
     log('Запускаем Readability');
     const article = new Readability(document.cloneNode(true)).parse();
     html = article ? article.content : '';
   }
+
   if (!html) {
     alert('Markdown Page Clipper: не удалось извлечь содержимое.');
     return;
