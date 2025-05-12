@@ -73,6 +73,7 @@
   log('author ', author);
   log('lang ', lang);
   log('bodymd.length ', bodymd.length);
+  log('bodymd.words ', bodyMd.split(/\s+/).length);
   const meta = {
     title: title,                                    // из Readability
     source: url,
