@@ -26,7 +26,7 @@
     const article = new Readability(document.cloneNode(true)).parse();
     const url   = location.href;                        // ← текущий URL
     const iso   = new Date().toISOString();   // машино-читаемая дата/время
-    let title = article.title?.trim() || '';
+    const title = article.title?.trim() || '';
     log('Readability ok, title =', title);
     html = article ? article.content : '';
     html = `<h1>${article.title}</h1>` +
