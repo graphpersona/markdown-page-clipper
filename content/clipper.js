@@ -24,6 +24,8 @@
   if (!html || html.length < 30) {
     log('Запускаем Readability');
     const article = new Readability(document.cloneNode(true)).parse();
+    let title = article.title?.trim() || '';
+    log('Readability ok, title =', title);
     html = article ? article.content : '';
   }
   if (!html) {
