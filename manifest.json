@@ -12,7 +12,8 @@
     "activeTab",
     "scripting",
     "clipboardWrite",
-    "clipboardRead"
+    "clipboardRead",
+    "contextMenus"
   ],
 
   "background": {
