@@ -57,6 +57,13 @@
     2.1. Add metadata YAML
   ----------------------------------------------*/
   log('Start create metadata');
+  log('title ', title);
+  log('url ', url);
+  log('iso ', iso);
+  log('location.hostname ', location.hostname);
+  log('article.byline ', article.byline);
+  log('document.documentElement.lang ', document.documentElement.lang);
+  log('bodymd.length ', bodymd.length);
   const meta = {
     title: title,                                    // из Readability
     source: url,
