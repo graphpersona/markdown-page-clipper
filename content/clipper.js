@@ -17,7 +17,7 @@
   const forceSelection = window.__mdclipperUseSelection === true;
 
   // Check for selection
-  if (sel && !sel.isCollapsed && sel.toString().trim().length >= 30) {
+  if (sel && !sel.isCollapsed) {
     const range = sel.getRangeAt(0).cloneContents();
     const div = document.createElement('div');
     div.appendChild(range);
@@ -29,19 +29,7 @@
   if ((!html || html.length < 30) && !forceSelection) {
     log('Запускаем Readability');
     const article = new Readability(document.cloneNode(true)).parse();
-    if (!article) { alert('Не удалось извлечь содержимое'); return; }
-    let title = article.title?.trim() || '';
-    
-    if (!title) {
-      // fallback: ищем первый <h1> в content
-      const tmp = document.createElement('div');
-      tmp.innerHTML = article.content;
-      const h1  = tmp.querySelector('h1');
-      title = h1 ? h1.textContent.trim() : '';
-    }
-    html = (title ? `<h1>${title}</h1>` : '') + article.content;
-    log('Readability ok, title =', title);
-    }
+    html = article ? article.content : '';
   }
 
   if (!html) {
