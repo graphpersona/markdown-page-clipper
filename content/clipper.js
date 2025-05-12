@@ -24,10 +24,11 @@
   if (!html || html.length < 30) {
     log('Запускаем Readability');
     const article = new Readability(document.cloneNode(true)).parse();
+    const url   = location.href;                        // ← текущий URL
     let title = article.title?.trim() || '';
     log('Readability ok, title =', title);
     html = article ? article.content : '';
-    html = `<h1>${article.title}</h1>` + html;
+    html = `<h1>${article.title}</h1>` +`<p><strong>Source:</strong> <a href="${url}">${url}</a></p>`+ html;
   }
   if (!html) {
     alert('Markdown Page Clipper: не удалось извлечь содержимое.');
