@@ -29,7 +29,8 @@
   if ((!html || html.length < 30) && !forceSelection) {
     log('Запускаем Readability');
     const article = new Readability(document.cloneNode(true)).parse();
-    html = article ? article.content : '';
+    const titleHtml = `<h1>${article.title}</h1>`;
+    html = titleHtml + article ? article.content : '';
   }
 
   if (!html) {
