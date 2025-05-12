@@ -51,7 +51,7 @@
     filter: n => n.nodeName === 'PRE',
     replacement: c => `\n\`\`\`\n${c.replace(/^\n+|\n+$/g,'')}\n\`\`\`\n`
   });
-  const md = td.turndown(html);
+  const bodymd = td.turndown(html);
 
   /*---------------------------------------------
     2.1. Add metadata YAML
@@ -71,7 +71,7 @@
           .map(([k, v]) => `${k}: ${v}`)   // ничего не пропускаем
           .join('\n') +
     '\n---\n\n';
-  const md = yaml + md;
+  const md = yaml + bodymd;
   
   /*---------------------------------------------
     3. Копируем в буфер
