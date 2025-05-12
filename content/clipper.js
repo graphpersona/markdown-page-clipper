@@ -63,7 +63,7 @@
     domain: location.hostname,
     author: article.byline || '',             // может быть ""
     lang: document.documentElement.lang || '',
-    words: md.length,
+    words: bodymd.length,
   };
   /* ---------- YAML-шапка без фильтра пустых ---------- */
   const yaml = '---\n' +
@@ -71,7 +71,7 @@
           .map(([k, v]) => `${k}: ${v}`)   // ничего не пропускаем
           .join('\n') +
     '\n---\n\n';
-  const md = yaml + bodymd;
+  md = yaml + bodymd;
   
   /*---------------------------------------------
     3. Копируем в буфер
