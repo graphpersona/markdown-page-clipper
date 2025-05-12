@@ -54,6 +54,26 @@
   const md = td.turndown(html);
 
   /*---------------------------------------------
+    2.1. Add metadata YAML
+  ----------------------------------------------*/
+  const meta = {
+    title: title,                                    // из Readability
+    source: url,
+    clipped: iso,
+    domain: location.hostname,
+    author: article.byline || '',             // может быть ""
+    lang: document.documentElement.lang || '',
+    words: md.length,
+  };
+  /* ---------- YAML-шапка без фильтра пустых ---------- */
+  const yaml = '---\n' +
+    Object.entries(meta)
+          .map(([k, v]) => `${k}: ${v}`)   // ничего не пропускаем
+          .join('\n') +
+    '\n---\n\n';
+  const md = yaml + md;
+  
+  /*---------------------------------------------
     3. Копируем в буфер
   ----------------------------------------------*/
   try {
