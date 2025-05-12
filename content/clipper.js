@@ -27,6 +27,7 @@
     let title = article.title?.trim() || '';
     log('Readability ok, title =', title);
     html = article ? article.content : '';
+    html = `<h1>${article.title}</h1>` + html;
   }
   if (!html) {
     alert('Markdown Page Clipper: не удалось извлечь содержимое.');
