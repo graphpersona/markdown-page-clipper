@@ -73,7 +73,7 @@
   log('author ', author);
   log('lang ', lang);
   log('bodymd.length ', bodymd.length);
-  log('bodymd.words ', bodyMd.split(/\s+/).length);
+  log('bodymd.words ', bodymd.split(/\s+/).length);
   const meta = {
     title: title,                                    // из Readability
     source: url,
@@ -81,7 +81,7 @@
     domain: domain,
     author: author,             // может быть ""
     lang: lang,
-    words: bodyMd.split(/\s+/).length      // именно количество слов,
+    words: bodymd.split(/\s+/).length      // именно количество слов,
   };
   log('Metadata: ', meta);
   /* ---------- YAML-шапка без фильтра пустых ---------- */
