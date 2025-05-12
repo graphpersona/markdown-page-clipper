@@ -14,6 +14,14 @@
   ----------------------------------------------*/
   const sel = getSelection();
   let html = null;
+  // переменные метаданных объявляем заранее
+  let title   = '';
+  const url   = location.href;
+  const iso   = new Date().toISOString();
+  let author  = '';
+  let domain  = location.hostname;
+  let lang    = document.documentElement.lang || '';
+  
   if (sel && !sel.isCollapsed) {
     const range = sel.getRangeAt(0).cloneContents();
     const div = document.createElement('div');
@@ -24,9 +32,10 @@
   if (!html || html.length < 30) {
     log('Запускаем Readability');
     const article = new Readability(document.cloneNode(true)).parse();
-    const url   = location.href;                        // ← текущий URL
-    const iso   = new Date().toISOString();   // машино-читаемая дата/время
-    const title = article.title?.trim() || '';
+
+    title = article.title?.trim() || '';
+    author = article.byline || '';
+    
     log('Readability ok, title =', title);
     html = article ? article.content : '';
     html = `<h1>${article.title}</h1>` +
@@ -60,26 +69,24 @@
   log('title ', title);
   log('url ', url);
   log('iso ', iso);
-  log('location.hostname ', location.hostname);
-  log('article.byline ', article.byline);
-  log('document.documentElement.lang ', document.documentElement.lang);
+  log('domain ', domain);
+  log('author ', author);
+  log('lang ', lang);
   log('bodymd.length ', bodymd.length);
   const meta = {
     title: title,                                    // из Readability
     source: url,
     clipped: iso,
-    domain: location.hostname,
-    author: article.byline || '',             // может быть ""
-    lang: document.documentElement.lang || '',
-    words: bodymd.length,
+    domain: domain,
+    author: author,             // может быть ""
+    lang: lang,
+    words: bodyMd.split(/\s+/).length      // именно количество слов,
   };
   log('Metadata: ', meta);
   /* ---------- YAML-шапка без фильтра пустых ---------- */
   const yaml = '---\n' +
-    Object.entries(meta)
-          .map(([k, v]) => `${k}: ${v}`)   // ничего не пропускаем
-          .join('\n') +
-    '\n---\n\n';
+    Object.entries(meta).map(([k,v]) => `${k}: ${v}`).join('\n') +
+  '\n---\n\n';
   log('yaml created');
   md = yaml + bodymd;
   log('md created');
