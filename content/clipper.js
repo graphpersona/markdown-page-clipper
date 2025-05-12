@@ -52,10 +52,11 @@
     replacement: c => `\n\`\`\`\n${c.replace(/^\n+|\n+$/g,'')}\n\`\`\`\n`
   });
   const bodymd = td.turndown(html);
-
+  log('bodymd created');
   /*---------------------------------------------
     2.1. Add metadata YAML
   ----------------------------------------------*/
+  log('Start create metadata');
   const meta = {
     title: title,                                    // из Readability
     source: url,
@@ -65,18 +66,22 @@
     lang: document.documentElement.lang || '',
     words: bodymd.length,
   };
+  log('Metadata: ', meta);
   /* ---------- YAML-шапка без фильтра пустых ---------- */
   const yaml = '---\n' +
     Object.entries(meta)
           .map(([k, v]) => `${k}: ${v}`)   // ничего не пропускаем
           .join('\n') +
     '\n---\n\n';
+  log('yaml created');
   md = yaml + bodymd;
-  
+  log('md created');
   /*---------------------------------------------
     3. Копируем в буфер
   ----------------------------------------------*/
+  log('start clipboard');
   try {
+    log('start clipboard try');
     await navigator.clipboard.writeText(md);
     log('✓ Скопировано в буфер, символов:', md.length);
   } catch (e) {
@@ -88,6 +93,7 @@
   /*---------------------------------------------
     4. Тост-уведомление
   ----------------------------------------------*/
+  log('start tost');
   const css = `
     .__mdclip_toast{all:initial;position:fixed;right:20px;bottom:20px;
       z-index:2147483647;background:#323232;color:#fff;font:14px/1.35 sans-serif;
@@ -101,6 +107,7 @@
   }
   const toast = document.createElement('div');
   toast.className = '__mdclip_toast';
+  log('get textContent');
   toast.textContent = `✓ Скопировано ${md.split(/\s+/).length} слов`;
   document.body.appendChild(toast);
   requestAnimationFrame(()=>toast.classList.add('show'));
