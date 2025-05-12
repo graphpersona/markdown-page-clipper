@@ -17,3 +17,7 @@
   - **words:** 2960
 ---
 - Copies the result to the clipboard and shows a toast
+
+## Comparison of processing results with Microsoft Markitdown
+- https://github.com/graphpersona/markdown-page-clipper/tree/main/data
+- When processing a web link, Microsoft Markitdown does not store absolute paths for embedded elements (images, etc.).
