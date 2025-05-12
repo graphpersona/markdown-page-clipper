@@ -25,10 +25,14 @@
     log('Запускаем Readability');
     const article = new Readability(document.cloneNode(true)).parse();
     const url   = location.href;                        // ← текущий URL
+    const iso   = new Date().toISOString();   // машино-читаемая дата/время
     let title = article.title?.trim() || '';
     log('Readability ok, title =', title);
     html = article ? article.content : '';
-    html = `<h1>${article.title}</h1>` +`<p><strong>Source:</strong> <a href="${url}">${url}</a></p>`+ html;
+    html = `<h1>${article.title}</h1>` +
+      `<p><strong>Source:</strong> <a href="${url}">${url}</a></p>`+ 
+      `<p><strong>Clipped:</strong> ${iso}</p>` +
+      html;
   }
   if (!html) {
     alert('Markdown Page Clipper: не удалось извлечь содержимое.');
